@@ -1,36 +1,142 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dashboard de Vida
 
-## Getting Started
+Panel único con calendario, correos, tareas y notas. Next.js 16 (App Router) ·
+Auth.js v5 · Prisma + Supabase Postgres · APIs de Google (solo lectura) ·
+resumen diario con Claude.
 
-First, run the development server:
+La navegación es responsive: sidebar en escritorio, menú + barra inferior en móvil
+(breakpoint `md`, 768 px).
+
+---
+
+## 1. Requisitos previos
+
+- Node 20+
+- Una cuenta de **Supabase**, **Google Cloud** y **Anthropic**
+
+## 2. Instalar
+
+```bash
+npm install
+cp .env.example .env
+```
+
+## 3. Base de datos (Supabase)
+
+1. Crea un proyecto en <https://supabase.com>.
+2. **Project Settings → Database → Connection string** y copia a `.env`:
+   - `DATABASE_URL` → cadena del **pooler**, modo *Transaction* (puerto **6543**),
+     añade `?pgbouncer=true`.
+   - `DIRECT_URL` → conexión **directa** (puerto **5432**).
+3. Crea las tablas:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+
+## 4. Google OAuth
+
+1. <https://console.cloud.google.com> → nuevo proyecto.
+2. **APIs y servicios → Biblioteca**: habilita **Gmail API**, **Google Calendar API**
+   y **Google Drive API**.
+3. **Pantalla de consentimiento OAuth**: tipo *Externo*. Añade los scopes:
+   ```
+   openid  email  profile
+   .../auth/gmail.readonly
+   .../auth/calendar.readonly
+   .../auth/drive.metadata.readonly
+   ```
+4. **Credenciales → Crear → ID de cliente OAuth → Aplicación web**. URIs de
+   redirección autorizados:
+   ```
+   http://localhost:3000/api/auth/callback/google
+   https://TU-APP.vercel.app/api/auth/callback/google
+   ```
+5. Copia el ID y el secreto a `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`.
+
+> **Importante — refresh token.** Con la app en estado *Testing*, Google **caduca el
+> refresh token cada 7 días** y tendrías que volver a iniciar sesión cada semana.
+> Para uso personal: en la pantalla de consentimiento pulsa **"Publicar aplicación"**
+> (estado *In production*). No necesitas verificación de Google; al iniciar sesión
+> verás una pantalla de "app no verificada" → *Configuración avanzada* → *Continuar*.
+> A partir de ahí los tokens dejan de caducar.
+
+## 5. Resto de variables
+
+```bash
+npx auth secret          # genera AUTH_SECRET
+```
+
+- `ALLOWED_EMAIL` — solo este correo podrá entrar (déjalo vacío para permitir a
+  cualquiera).
+- `ANTHROPIC_API_KEY` — para el resumen diario.
+- `CRON_SECRET` — cadena larga y aleatoria (protege el endpoint del cron).
+- `APP_TZ` — zona horaria para fechas y para agrupar el resumen (por defecto
+  `America/Bogota`).
+
+## 6. Arrancar
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre <http://localhost:3000>. Te redirige a `/login`, inicias sesión con Google y
+otorgas los permisos. Comprueba en Supabase que la fila `Account` tiene
+`refresh_token` **no nulo** (si es nulo, faltó `prompt=consent` — revisa `src/auth.ts`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Despliegue en Vercel
 
-## Learn More
+1. Importa el repo en Vercel.
+2. Variables de entorno: todas las de `.env` **más**:
+   - `AUTH_URL = https://TU-APP.vercel.app`
+3. `vercel.json` ya define:
+   - `buildCommand: prisma generate && next build`
+   - cron diario `0 12 * * *` UTC = **7:00 a. m. en Bogotá** → `/api/cron/daily-summary`
+4. Añade la redirect URI de producción en Google Cloud (paso 4.4).
 
-To learn more about Next.js, take a look at the following resources:
+Probar el cron a mano:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" https://TU-APP.vercel.app/api/cron/daily-summary
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Estructura
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+  auth.ts                      Auth.js v5 (Google, sesión en BD, acceso restringido)
+  app/
+    (app)/                     Rutas con sesión (guard + AppShell)
+      page.tsx                 Resumen (dashboard)
+      calendario/ tareas/ notas/ correos/ archivos/
+    login/                     Pantalla de acceso
+    api/auth/[...nextauth]/    Handler de Auth.js
+    api/cron/daily-summary/    Regenera el resumen (Vercel Cron)
+    actions/                   Server Actions: tasks, notes, summary, auth
+  lib/
+    db.ts                      Prisma singleton
+    google/                    client (refresco de token) + calendar / gmail / drive
+    summary.ts                 Genera el resumen con Claude y lo cachea en BD
+    time.ts / format.ts        Fechas y horas en la zona de la app
+    memo.ts                    Cache en memoria con TTL para las lecturas de Google
+  components/
+    app-shell.tsx              Sidebar + navegación móvil (drawer + barra inferior)
+    cards/                     Tarjetas del dashboard
+    notes/ calendar/           Editor de notas · vista semanal
+prisma/schema.prisma           User/Account/Session + Task/Note/DailySummary
+design/                        Mockups del diseño (canvas de Claude Design)
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notas de diseño
+
+- Tokens de color en `src/app/globals.css` (`--accent #16A34A`, `--sidebar #0F2A1D`, …),
+  expuestos como utilidades Tailwind (`bg-accent`, `text-muted`, `border-border`…).
+- Tipografías: Space Grotesk (títulos) + IBM Plex Sans (texto) vía `next/font`.
+- Lecturas de Google cacheadas 30 s por usuario (`lib/memo.ts`, TTL ajustable en los
+  `memo(...)` de `lib/google/*`). Si una integración
+  falla, su tarjeta muestra "Reconectar" sin tumbar el resto del panel.
+- El resumen diario se guarda en `DailySummary (userId, date)`: la segunda carga del
+  día es instantánea. El botón fuerza regeneración; el cron la hace cada mañana.

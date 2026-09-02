@@ -1,0 +1,15 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1060, "title": "Resumen — escritorio" },
+    { "file": "MainMobile.dc.html", "x": 1540, "y": 0, "w": 390, "h": 1540, "title": "Resumen — móvil" },
+    { "file": "ResumenAlt.dc.html", "x": 2030, "y": 0, "w": 1440, "h": 1060, "title": "Resumen — alterna (cockpit)" },
+    { "file": "Notas.dc.html", "x": 0, "y": 1700, "w": 1440, "h": 1060, "title": "Notas" },
+    { "file": "Calendario.dc.html", "x": 2030, "y": 1700, "w": 1440, "h": 1060, "title": "Calendario — semana" }
+  ],
+  "annotations": [
+    { "id": "note-principal", "x": 0, "y": -104, "w": 520, "text": "Propuesta principal — escritorio. Fiel a la imagen de referencia: sidebar completo, saludo, banner de resumen diario IA, grid 2×2 de tarjetas + herramientas conectadas. Paleta verde bosque / #16A34A." },
+    { "id": "note-movil", "x": 1540, "y": -104, "w": 430, "text": "Misma pantalla en móvil (390px). Sidebar → menú hamburguesa + barra de navegación inferior; grid 2×2 → una sola columna; herramientas en grid de 2. La versión real será responsive con este mismo breakpoint." },
+    { "id": "note-alterna", "x": 2030, "y": -104, "w": 520, "text": "Alterna del dashboard — rail de iconos estrecho, resumen del día en banner oscuro a lo ancho, grid de 3 columnas. Más densa, estilo cockpit." }
+  ],
+  "launch": { "view": "canvas" }
+}

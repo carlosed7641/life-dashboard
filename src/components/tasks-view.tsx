@@ -1,0 +1,173 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { CheckBox } from "@/components/checkbox";
+import { IconPlus, IconStar, IconTrash } from "@/components/icons";
+import { dueLabel, parseDay } from "@/lib/format";
+import { cn } from "@/lib/cn";
+import {
+  createTask,
+  toggleTask,
+  setTaskPriority,
+  deleteTask,
+} from "@/app/actions/tasks";
+
+type Task = {
+  id: string;
+  title: string;
+  done: boolean;
+  priority: boolean;
+  dueDate: string | null;
+};
+
+export function TasksView({ initial }: { initial: Task[] }) {
+  const [tasks, setTasks] = useState<Task[]>(initial);
+  const [title, setTitle] = useState("");
+  const [due, setDue] = useState("");
+  const [, startTransition] = useTransition();
+
+  const pending = tasks.filter((t) => !t.done);
+  const done = tasks.filter((t) => t.done);
+
+  function add(e: React.FormEvent) {
+    e.preventDefault();
+    const value = title.trim();
+    if (!value) return;
+    const optimistic: Task = {
+      id: `tmp-${Date.now()}`,
+      title: value,
+      done: false,
+      priority: false,
+      dueDate: due || null,
+    };
+    setTasks((prev) => [optimistic, ...prev]);
+    setTitle("");
+    setDue("");
+    startTransition(() => {
+      void createTask({ title: value, dueDate: due || null });
+    });
+  }
+
+  function toggle(t: Task) {
+    const next = !t.done;
+    setTasks((prev) => prev.map((x) => (x.id === t.id ? { ...x, done: next } : x)));
+    startTransition(() => {
+      void toggleTask(t.id, next);
+    });
+  }
+
+  function star(t: Task) {
+    const next = !t.priority;
+    setTasks((prev) => prev.map((x) => (x.id === t.id ? { ...x, priority: next } : x)));
+    startTransition(() => {
+      void setTaskPriority(t.id, next);
+    });
+  }
+
+  function remove(t: Task) {
+    setTasks((prev) => prev.filter((x) => x.id !== t.id));
+    startTransition(() => {
+      void deleteTask(t.id);
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <form
+        onSubmit={add}
+        className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-2.5 sm:flex-row sm:items-center"
+      >
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Añadir una tarea…"
+          className="flex-1 bg-transparent px-1 text-sm outline-none placeholder:text-muted"
+        />
+        <input
+          type="date"
+          value={due}
+          onChange={(e) => setDue(e.target.value)}
+          className="rounded-lg border border-border px-2 py-1.5 text-sm text-muted outline-none"
+        />
+        <button
+          type="submit"
+          className="flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover"
+        >
+          <IconPlus size={15} />
+          Añadir
+        </button>
+      </form>
+
+      <TaskGroup title={`Pendientes (${pending.length})`}>
+        {pending.length === 0 ? (
+          <p className="p-3 text-sm text-muted">Nada pendiente.</p>
+        ) : (
+          pending.map((t) => (
+            <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onStar={() => star(t)} onRemove={() => remove(t)} />
+          ))
+        )}
+      </TaskGroup>
+
+      {done.length > 0 && (
+        <TaskGroup title={`Completadas (${done.length})`}>
+          {done.map((t) => (
+            <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onStar={() => star(t)} onRemove={() => remove(t)} />
+          ))}
+        </TaskGroup>
+      )}
+    </div>
+  );
+}
+
+function TaskGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-1">
+      <h2 className="mb-1 font-display text-[13px] font-semibold uppercase tracking-wide text-muted">
+        {title}
+      </h2>
+      <div className="flex flex-col divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function TaskRow({
+  task,
+  onToggle,
+  onStar,
+  onRemove,
+}: {
+  task: Task;
+  onToggle: () => void;
+  onStar: () => void;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="group flex items-center gap-3 px-4 py-3 text-sm">
+      <CheckBox checked={task.done} onToggle={onToggle} />
+      <span className={cn("flex-1 truncate", task.done && "text-muted line-through")}>
+        {task.title}
+      </span>
+      {task.dueDate && (
+        <span className="shrink-0 text-xs text-muted">{dueLabel(parseDay(task.dueDate))}</span>
+      )}
+      <button
+        type="button"
+        onClick={onStar}
+        aria-label="Prioridad"
+        className={cn("shrink-0", task.priority ? "text-accent" : "text-border-strong hover:text-muted")}
+      >
+        <IconStar size={16} filled={task.priority} />
+      </button>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label="Eliminar"
+        className="shrink-0 text-border-strong hover:text-red-600"
+      >
+        <IconTrash size={15} />
+      </button>
+    </div>
+  );
+}

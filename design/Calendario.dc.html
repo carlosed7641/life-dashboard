@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #F6FAF7; }
+    body { font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; color: #0B1F16; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { font-family: 'Space Grotesk', system-ui, sans-serif; }
+    a { color: #16A34A; text-decoration: none; }
+    a:hover { color: #128040; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); }
+  </style>
+</helmet>
+
+<div style="display:flex; width:1440px; min-height:1024px; background:#F6FAF7;">
+
+  <!-- SIDEBAR -->
+  <aside style="width:240px; flex-shrink:0; background:#0F2A1D; padding:28px 18px; display:flex; flex-direction:column; gap:26px;">
+    <div style="display:flex; align-items:center; gap:11px; padding:0 6px;">
+      <div style="width:34px; height:34px; border-radius:11px; background:#16A34A; display:flex; align-items:center; justify-content:center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      </div>
+      <span style="color:#F4FBF7; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px;">Mi Dashboard</span>
+    </div>
+    <nav style="display:flex; flex-direction:column; gap:3px;">
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Resumen</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; font-weight:600; color:#FFFFFF; background:rgba(22,163,74,0.20);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18"/><path d="M8 3v3"/><path d="M16 3v3"/></svg>Calendario</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>Tareas</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>Correos</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Proyectos</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>Notas</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6"/></svg>Archivos</div>
+    </nav>
+    <div style="margin-top:auto; display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,0.05);">
+      <div style="width:30px; height:30px; border-radius:50%; background:#2E6B4C; display:flex; align-items:center; justify-content:center; color:#EAF7EF; font-size:12px; font-weight:600;">CC</div>
+      <div style="display:flex; flex-direction:column; line-height:1.3;"><span style="color:#EAF7EF; font-size:13px; font-weight:600;">Carlos C.</span><span style="color:#7FA593; font-size:11px;">carlosed7641@gmail.com</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main style="flex:1; padding:34px 40px; display:flex; flex-direction:column; gap:20px;">
+
+    <header style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h1 style="margin:0; font-size:24px; font-weight:600;">Septiembre 2026</h1>
+        <p style="margin:6px 0 0; color:#5C7268; font-size:14px;">Semana del 1 – 7 de septiembre</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="display:flex; border:1px solid #E3EDE7; border-radius:9px; overflow:hidden; background:#fff;">
+          <span style="padding:8px 10px; border-right:1px solid #E3EDE7; cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5C7268" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span>
+          <span style="padding:8px 10px; cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5C7268" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+        </div>
+        <button style="border:1px solid #E3EDE7; background:#fff; border-radius:9px; padding:8px 14px; font-size:13px; font-family:inherit; color:#0B1F16; cursor:pointer;">Hoy</button>
+        <div style="display:flex; border:1px solid #E3EDE7; border-radius:9px; overflow:hidden; font-size:13px; background:#fff;">
+          <span style="padding:8px 12px; color:#8A9E94; cursor:pointer;">Día</span>
+          <span style="padding:8px 12px; background:#16A34A; color:#fff; font-weight:600;">Semana</span>
+          <span style="padding:8px 12px; color:#8A9E94; cursor:pointer;">Mes</span>
+        </div>
+      </div>
+    </header>
+
+    <div style="background:#fff; border:1px solid #E3EDE7; border-radius:16px; overflow:hidden;">
+      <!-- day headers -->
+      <div style="display:flex; border-bottom:1px solid #E3EDE7;">
+        <div style="width:64px; flex-shrink:0;"></div>
+        <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+          <div style="{{d.headStyle}}">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">{{d.dow}}</div>
+            <div style="font-size:16px; font-weight:600; margin-top:2px;">{{d.num}}</div>
+          </div>
+        </sc-for>
+      </div>
+      <!-- body -->
+      <div style="display:flex; height:616px;">
+        <div style="width:64px; flex-shrink:0;">
+          <sc-for list="{{hours}}" as="h" hint-placeholder-count="11">
+            <div style="height:56px; font-size:10.5px; color:#5C7268; text-align:right; padding:2px 8px 0 0;">{{h.label}}</div>
+          </sc-for>
+        </div>
+        <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+          <div style="flex:1; position:relative; border-left:1px solid #EEF3F0; background-image:repeating-linear-gradient(to bottom, transparent, transparent 55px, #EEF3F0 55px, #EEF3F0 56px);">
+            <sc-for list="{{d.events}}" as="e" hint-placeholder-count="2">
+              <div style="{{e.style}}">
+                <div style="font-weight:600; font-size:11px; line-height:1.25;">{{e.title}}</div>
+                <div style="font-size:10px; opacity:0.85; margin-top:1px;">{{e.time}}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() {
+    const HOUR = 56, START = 8;
+    const dows = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    const raw = [
+      [ { t:'Reunión de equipo', s:9,  e:10, tone:'solid' },
+        { t:'Llamada con cliente', s:10.5, e:11.5, tone:'solid' },
+        { t:'Revisión del proyecto', s:13, e:14, tone:'solid' },
+        { t:'Gimnasio', s:17, e:18, tone:'soft' } ],
+      [ { t:'1:1 con Ana', s:11, e:12, tone:'solid' } ],
+      [ { t:'Taller de diseño', s:9, e:11, tone:'soft' },
+        { t:'Bloque de enfoque', s:15, e:17, tone:'soft' } ],
+      [ { t:'Almuerzo de equipo', s:12, e:13, tone:'soft' } ],
+      [ { t:'Demo con cliente', s:10, e:11, tone:'solid' },
+        { t:'Retro semanal', s:16, e:17, tone:'solid' } ],
+      [ { t:'Compras', s:11, e:12, tone:'soft' } ],
+      [],
+    ];
+    const soft = 'background:#DCFCE7; color:#14532D; border-left:3px solid #16A34A;';
+    const solid = 'background:#16A34A; color:#ffffff;';
+    const fmt = (n) => {
+      const h = Math.floor(n), m = Math.round((n - h) * 60);
+      const ap = h < 12 ? 'a.m.' : 'p.m.';
+      let hh = h % 12; if (hh === 0) hh = 12;
+      return hh + (m ? ':' + String(m).padStart(2, '0') : '') + ' ' + ap;
+    };
+    const days = dows.map((dow, i) => {
+      const today = i === 0;
+      return {
+        dow, num: String(i + 1),
+        headStyle: 'flex:1; text-align:center; padding:10px 4px; border-left:1px solid #EEF3F0; color:' +
+          (today ? '#16A34A' : '#5C7268') + (today ? '; background:#F1FBF4;' : ';'),
+        events: raw[i].map((ev) => ({
+          title: ev.t,
+          time: fmt(ev.s) + ' – ' + fmt(ev.e),
+          style: 'position:absolute; left:4px; right:4px; box-sizing:border-box; overflow:hidden; border-radius:8px; padding:5px 7px; ' +
+            'top:' + ((ev.s - START) * HOUR + 3) + 'px; height:' + ((ev.e - ev.s) * HOUR - 6) + 'px; ' +
+            (ev.tone === 'solid' ? solid : soft),
+        })),
+      };
+    });
+    const hours = [];
+    for (let h = START; h <= 18; h++) hours.push({ label: fmt(h).replace(':00', '') });
+    return { days, hours };
+  }
+}
+</script>
+</body>
+</html>

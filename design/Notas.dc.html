@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #F6FAF7; }
+    body { font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; color: #0B1F16; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { font-family: 'Space Grotesk', system-ui, sans-serif; }
+    a { color: #16A34A; text-decoration: none; }
+    a:hover { color: #128040; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); }
+    .note-row:hover { background: #F1F7F3; }
+    .btn:hover { background: #128040; }
+  </style>
+</helmet>
+
+<div style="display:flex; width:1440px; min-height:1024px; background:#F6FAF7;">
+
+  <!-- SIDEBAR -->
+  <aside style="width:240px; flex-shrink:0; background:#0F2A1D; padding:28px 18px; display:flex; flex-direction:column; gap:26px;">
+    <div style="display:flex; align-items:center; gap:11px; padding:0 6px;">
+      <div style="width:34px; height:34px; border-radius:11px; background:#16A34A; display:flex; align-items:center; justify-content:center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      </div>
+      <span style="color:#F4FBF7; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px;">Mi Dashboard</span>
+    </div>
+    <nav style="display:flex; flex-direction:column; gap:3px;">
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Resumen</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18"/><path d="M8 3v3"/><path d="M16 3v3"/></svg>Calendario</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>Tareas</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>Correos</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Proyectos</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; font-weight:600; color:#FFFFFF; background:rgba(22,163,74,0.20);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>Notas</div>
+      <div class="nav-item" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:14px; color:#9DBDB0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6"/></svg>Archivos</div>
+    </nav>
+    <div style="margin-top:auto; display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,0.05);">
+      <div style="width:30px; height:30px; border-radius:50%; background:#2E6B4C; display:flex; align-items:center; justify-content:center; color:#EAF7EF; font-size:12px; font-weight:600;">CC</div>
+      <div style="display:flex; flex-direction:column; line-height:1.3;"><span style="color:#EAF7EF; font-size:13px; font-weight:600;">Carlos C.</span><span style="color:#7FA593; font-size:11px;">carlosed7641@gmail.com</span></div>
+    </div>
+  </aside>
+
+  <!-- NOTES LIST PANE -->
+  <section style="width:328px; flex-shrink:0; background:#fff; border-right:1px solid #E3EDE7; padding:24px 20px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1 style="margin:0; font-size:20px; font-weight:600;">Notas</h1>
+      <span style="font-size:12px; color:#5C7268;">14 notas</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:9px; background:#F1F7F3; border:1px solid #E3EDE7; border-radius:10px; padding:9px 12px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C7268" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <span style="font-size:13px; color:#8A9E94;">Buscar en notas…</span>
+    </div>
+    <button class="btn" style="background:#16A34A; color:#fff; border:none; border-radius:10px; padding:10px; font-size:13.5px; font-weight:600; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:7px; cursor:pointer;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      Nueva nota
+    </button>
+
+    <div style="display:flex; flex-direction:column; gap:4px; margin-top:2px;">
+      <div class="note-row" style="padding:13px 14px; border-radius:11px; background:#DCFCE7; border-left:3px solid #16A34A; display:flex; flex-direction:column; gap:4px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A" stroke="none"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6L5.7 21 8 13.9 2 9.4h7.6z"/></svg>
+          <span style="font-size:14px; font-weight:600;">Propuesta cliente Q3</span>
+        </div>
+        <span style="font-size:12.5px; color:#5C7268; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">Objetivos de la propuesta, alcance y entregables. Pendiente cerrar presupuesto y timeline con el equipo…</span>
+        <span style="font-size:11px; color:#8A9E94;">Editado hace 5 min</span>
+      </div>
+      <div class="note-row" style="padding:13px 14px; border-radius:11px; display:flex; flex-direction:column; gap:4px;">
+        <span style="font-size:14px; font-weight:600;">Ideas — producto</span>
+        <span style="font-size:12.5px; color:#5C7268; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">Lista de mejoras para la v2: onboarding más corto, notificaciones agrupadas, modo oscuro…</span>
+        <span style="font-size:11px; color:#8A9E94;">Ayer</span>
+      </div>
+      <div class="note-row" style="padding:13px 14px; border-radius:11px; display:flex; flex-direction:column; gap:4px;">
+        <span style="font-size:14px; font-weight:600;">Reunión de equipo · 28 ago</span>
+        <span style="font-size:12.5px; color:#5C7268; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">Acuerdos: mover la demo al viernes, Ana revisa el copy, Luis prepara el deck…</span>
+        <span style="font-size:11px; color:#8A9E94;">28 ago</span>
+      </div>
+      <div class="note-row" style="padding:13px 14px; border-radius:11px; display:flex; flex-direction:column; gap:4px;">
+        <span style="font-size:14px; font-weight:600;">Lecturas pendientes</span>
+        <span style="font-size:12.5px; color:#5C7268; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">Artículos y libros para el trimestre. Priorizar los de gestión de producto…</span>
+        <span style="font-size:11px; color:#8A9E94;">25 ago</span>
+      </div>
+      <div class="note-row" style="padding:13px 14px; border-radius:11px; display:flex; flex-direction:column; gap:4px;">
+        <span style="font-size:14px; font-weight:600;">Gastos del mes</span>
+        <span style="font-size:12.5px; color:#5C7268; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">Suscripciones a revisar, recibos por subir a Drive, seguimiento de factura pendiente…</span>
+        <span style="font-size:11px; color:#8A9E94;">22 ago</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDITOR PANE -->
+  <main style="flex:1; background:#fff; padding:36px 52px; display:flex; flex-direction:column; gap:22px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#5C7268;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Guardado hace un momento
+      </div>
+      <div style="display:flex; gap:8px;">
+        <div style="display:flex; border:1px solid #E3EDE7; border-radius:9px; overflow:hidden; font-size:12.5px;">
+          <span style="padding:6px 12px; background:#F1F7F3; color:#8A9E94;">Markdown</span>
+          <span style="padding:6px 12px; background:#16A34A; color:#fff; font-weight:600;">Vista previa</span>
+        </div>
+        <button style="display:flex; align-items:center; gap:6px; border:1px solid #E3EDE7; background:#fff; border-radius:9px; padding:6px 12px; font-size:12.5px; font-family:inherit; color:#0B1F16; cursor:pointer;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6L5.7 21 8 13.9 2 9.4h7.6z"/></svg>
+          Fijada
+        </button>
+      </div>
+    </div>
+
+    <input value="Propuesta cliente Q3" style="border:none; outline:none; font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:600; color:#0B1F16; padding:0; background:transparent;" />
+
+    <div style="display:flex; flex-direction:column; gap:14px; font-size:14.5px; line-height:1.7; color:#243B31; max-width:680px;">
+      <p style="margin:0;">Documento de trabajo para la propuesta del cliente. Objetivo: cerrar alcance y presupuesto antes de la llamada del <strong>lunes 1 de septiembre</strong>.</p>
+      <h3 style="margin:8px 0 0; font-size:17px; font-weight:600;">Alcance</h3>
+      <ul style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px;">
+        <li>Auditoría del flujo actual y puntos de fricción</li>
+        <li>Rediseño de las 3 pantallas clave</li>
+        <li>Plan de implementación en 2 fases</li>
+      </ul>
+      <h3 style="margin:8px 0 0; font-size:17px; font-weight:600;">Pendientes</h3>
+      <div style="display:flex; flex-direction:column; gap:9px;">
+        <div style="display:flex; align-items:center; gap:10px;"><span style="width:17px; height:17px; border-radius:5px; background:#16A34A; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5 11-11"/></svg></span><span style="color:#5C7268; text-decoration:line-through;">Definir entregables</span></div>
+        <div style="display:flex; align-items:center; gap:10px;"><span style="width:17px; height:17px; border-radius:5px; border:1.5px solid #C6D8CE; flex-shrink:0;"></span><span>Confirmar presupuesto con finanzas</span></div>
+        <div style="display:flex; align-items:center; gap:10px;"><span style="width:17px; height:17px; border-radius:5px; border:1.5px solid #C6D8CE; flex-shrink:0;"></span><span>Enviar borrador para revisión interna</span></div>
+      </div>
+      <blockquote style="margin:8px 0 0; padding:10px 16px; border-left:3px solid #16A34A; background:#F1F7F3; border-radius:0 8px 8px 0; color:#3A5145; font-style:italic;">
+        Nota del cliente: priorizan rapidez de entrega sobre exhaustividad en la fase 1.
+      </blockquote>
+      <p style="margin:8px 0 0;">Referencia de tarifas en <code style="font-family:'IBM Plex Mono',monospace; font-size:13px; background:#F1F7F3; padding:2px 6px; border-radius:5px;">Drive / Comercial / tarifas-2026.xlsx</code>.</p>
+    </div>
+  </main>
+</div>
+</x-dc>
+</body>
+</html>
