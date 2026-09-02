@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV, MOBILE_TABS, isActive } from "@/lib/nav";
 import { NAV_ICON, IconHome, IconMenu, IconDots, IconLogout } from "@/components/icons";
@@ -9,6 +10,36 @@ import { signOutAction } from "@/app/actions/auth";
 import { cn } from "@/lib/cn";
 
 type UserInfo = { name: string | null; email: string | null; image: string | null };
+
+function Avatar({
+  user,
+  initials,
+  size,
+}: {
+  user: UserInfo;
+  initials: string;
+  size: number;
+}) {
+  if (user.image) {
+    return (
+      <Image
+        src={user.image}
+        alt={user.name ?? "Perfil"}
+        width={size}
+        height={size}
+        className="shrink-0 rounded-full object-cover"
+      />
+    );
+  }
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center rounded-full bg-[#2e6b4c] font-semibold text-[#eaf7ef]"
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}
+    >
+      {initials}
+    </span>
+  );
+}
 
 export function AppShell({
   user,
@@ -65,9 +96,7 @@ export function AppShell({
             Mi Dashboard
           </span>
         </div>
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2e6b4c] text-[12px] font-semibold text-[#eaf7ef]">
-          {initials}
-        </span>
+        <Avatar user={user} initials={initials} size={32} />
       </header>
 
       {/* Contenido */}
@@ -183,9 +212,7 @@ function NavLink({
 function UserChip({ user, initials }: { user: UserInfo; initials: string }) {
   return (
     <div className="flex items-center gap-[11px] rounded-xl bg-white/5 px-3 py-2.5">
-      <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[#2e6b4c] text-[12px] font-semibold text-[#eaf7ef]">
-        {initials}
-      </span>
+      <Avatar user={user} initials={initials} size={30} />
       <div className="flex min-w-0 flex-col leading-tight">
         <span className="truncate text-[13px] font-semibold text-[#eaf7ef]">
           {user.name ?? "Mi cuenta"}
