@@ -2,13 +2,21 @@
 
 import { useState, useTransition } from "react";
 import { CheckBox } from "@/components/checkbox";
-import { IconPlus, IconStar, IconTrash } from "@/components/icons";
+import {
+  IconPlus,
+  IconStar,
+  IconTrash,
+  IconPencil,
+  IconCheck,
+  IconX,
+} from "@/components/icons";
 import { dueLabel, parseDay } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import {
   createTask,
   toggleTask,
   setTaskPriority,
+  updateTask,
   deleteTask,
 } from "@/app/actions/tasks";
 
@@ -64,6 +72,13 @@ export function TasksView({ initial }: { initial: Task[] }) {
     });
   }
 
+  function edit(id: string, patch: { title?: string; dueDate?: string | null }) {
+    setTasks((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+    startTransition(() => {
+      void updateTask(id, patch);
+    });
+  }
+
   function remove(t: Task) {
     setTasks((prev) => prev.filter((x) => x.id !== t.id));
     startTransition(() => {
@@ -103,7 +118,14 @@ export function TasksView({ initial }: { initial: Task[] }) {
           <p className="p-3 text-sm text-muted">Nada pendiente.</p>
         ) : (
           pending.map((t) => (
-            <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onStar={() => star(t)} onRemove={() => remove(t)} />
+            <TaskRow
+              key={t.id}
+              task={t}
+              onToggle={() => toggle(t)}
+              onStar={() => star(t)}
+              onRemove={() => remove(t)}
+              onEdit={(patch) => edit(t.id, patch)}
+            />
           ))
         )}
       </TaskGroup>
@@ -111,7 +133,14 @@ export function TasksView({ initial }: { initial: Task[] }) {
       {done.length > 0 && (
         <TaskGroup title={`Completadas (${done.length})`}>
           {done.map((t) => (
-            <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onStar={() => star(t)} onRemove={() => remove(t)} />
+            <TaskRow
+              key={t.id}
+              task={t}
+              onToggle={() => toggle(t)}
+              onStar={() => star(t)}
+              onRemove={() => remove(t)}
+              onEdit={(patch) => edit(t.id, patch)}
+            />
           ))}
         </TaskGroup>
       )}
@@ -137,21 +166,100 @@ function TaskRow({
   onToggle,
   onStar,
   onRemove,
+  onEdit,
 }: {
   task: Task;
   onToggle: () => void;
   onStar: () => void;
   onRemove: () => void;
+  onEdit: (patch: { title?: string; dueDate?: string | null }) => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(task.title);
+  const [draftDue, setDraftDue] = useState(task.dueDate?.slice(0, 10) ?? "");
+  const isTemp = task.id.startsWith("tmp-");
+
+  function startEdit() {
+    if (isTemp) return;
+    setDraftTitle(task.title);
+    setDraftDue(task.dueDate?.slice(0, 10) ?? "");
+    setEditing(true);
+  }
+
+  function save() {
+    const t = draftTitle.trim();
+    if (!t) return;
+    onEdit({ title: t, dueDate: draftDue || null });
+    setEditing(false);
+  }
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-2 px-4 py-2.5 text-sm">
+        <CheckBox checked={task.done} disabled />
+        <input
+          autoFocus
+          value={draftTitle}
+          onChange={(e) => setDraftTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") save();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className="min-w-0 flex-1 rounded-md border border-border bg-transparent px-2 py-1 outline-none focus:border-accent"
+        />
+        <input
+          type="date"
+          value={draftDue}
+          onChange={(e) => setDraftDue(e.target.value)}
+          className="shrink-0 rounded-md border border-border px-1.5 py-1 text-xs text-muted outline-none"
+        />
+        <button
+          type="button"
+          onClick={save}
+          aria-label="Guardar"
+          className="shrink-0 text-accent hover:text-accent-hover"
+        >
+          <IconCheck size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={() => setEditing(false)}
+          aria-label="Cancelar"
+          className="shrink-0 text-muted hover:text-text"
+        >
+          <IconX size={15} />
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="group flex items-center gap-3 px-4 py-3 text-sm">
       <CheckBox checked={task.done} onToggle={onToggle} />
-      <span className={cn("flex-1 truncate", task.done && "text-muted line-through")}>
+      <button
+        type="button"
+        onClick={startEdit}
+        disabled={isTemp}
+        title="Editar"
+        className={cn(
+          "min-w-0 flex-1 truncate text-left",
+          task.done && "text-muted line-through",
+        )}
+      >
         {task.title}
-      </span>
+      </button>
       {task.dueDate && (
         <span className="shrink-0 text-xs text-muted">{dueLabel(parseDay(task.dueDate))}</span>
       )}
+      <button
+        type="button"
+        onClick={startEdit}
+        disabled={isTemp}
+        aria-label="Editar"
+        className="shrink-0 text-border-strong hover:text-muted disabled:opacity-30"
+      >
+        <IconPencil size={15} />
+      </button>
       <button
         type="button"
         onClick={onStar}
