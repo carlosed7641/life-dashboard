@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconChat, IconX, IconSend, IconLock, IconPencil } from "@/components/icons";
+import { IconChat, IconX, IconSend } from "@/components/icons";
 import { ChatMessage, type ChatRole } from "@/components/chat/chat-message";
+import { ProposalCard, type ProposalOutcome } from "@/components/chat/proposal-card";
+import { PermissionsNote } from "@/components/chat/permissions-note";
 import { streamChat, type ChatEvent } from "@/lib/chat/client";
 import type { Proposal } from "@/lib/chat/tools";
 import { SUGGESTED_PROMPTS } from "@/lib/chat/prompt";
@@ -29,6 +31,9 @@ export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [proposals, setProposals] = useState<Proposal[]>([]);
+  // Resultado de cada propuesta, para que la tarjeta no vuelva a mostrar "Aceptar"
+  // al cerrar y reabrir el panel (ProposalCard se re-monta, el widget no).
+  const [resolved, setResolved] = useState<Record<string, ProposalOutcome>>({});
   const [activeTools, setActiveTools] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -74,6 +79,8 @@ export function ChatWidget() {
 
       setError(null);
       setInput("");
+      setProposals([]); // las propuestas anteriores caducan al enviar otro mensaje
+      setResolved({});
       const assistantId = crypto.randomUUID();
       setMessages((prev) => [
         ...prev,
@@ -149,10 +156,7 @@ export function ChatWidget() {
             <header className="flex items-start justify-between gap-2 border-b border-border bg-card px-4 py-3">
               <div className="min-w-0">
                 <p className="font-display text-[15px] font-semibold">Asistente</p>
-                <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted">
-                  <IconLock size={12} />
-                  Google: solo lectura · Tareas y notas: edición
-                </p>
+                <PermissionsNote variant="header" />
               </div>
               <button
                 type="button"
@@ -191,7 +195,14 @@ export function ChatWidget() {
               )}
 
               {proposals.map((p) => (
-                <ProposalStub key={p.id} proposal={p} />
+                <ProposalCard
+                  key={p.id}
+                  proposal={p}
+                  settled={resolved[p.id]}
+                  onSettled={(outcome) =>
+                    setResolved((r) => ({ ...r, [p.id]: outcome }))
+                  }
+                />
               ))}
 
               {error && (
@@ -246,22 +257,7 @@ export function ChatWidget() {
 function EmptyState({ onPick }: { onPick: (t: string) => void }) {
   return (
     <div className="space-y-3 py-2">
-      <div className="space-y-2 rounded-2xl border border-border bg-card p-3.5 text-[13px]">
-        <p className="flex gap-2">
-          <IconLock size={15} className="mt-0.5 shrink-0 text-muted" />
-          <span>
-            Puedo <strong>leer</strong> tu calendario, correos y archivos de Drive. No puedo
-            modificarlos.
-          </span>
-        </p>
-        <p className="flex gap-2">
-          <IconPencil size={15} className="mt-0.5 shrink-0 text-muted" />
-          <span>
-            Puedo <strong>crear, editar y borrar</strong> tareas y notas — siempre te pido
-            confirmación antes.
-          </span>
-        </p>
-      </div>
+      <PermissionsNote variant="full" />
       <div className="flex flex-col gap-1.5">
         {SUGGESTED_PROMPTS.map((p) => (
           <button
@@ -274,15 +270,6 @@ function EmptyState({ onPick }: { onPick: (t: string) => void }) {
           </button>
         ))}
       </div>
-    </div>
-  );
-}
-
-/** Placeholder mínimo — la tarjeta real de confirmación llega en la Fase 4. */
-function ProposalStub({ proposal }: { proposal: Proposal }) {
-  return (
-    <div className="rounded-xl border border-accent-soft-border bg-accent-soft/50 px-3 py-2 text-[12px] text-accent-ink">
-      Propuesta pendiente: <code>{proposal.kind}</code>
     </div>
   );
 }

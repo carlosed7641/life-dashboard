@@ -491,7 +491,11 @@ async function dispatch(name: string, input: unknown, userId: string): Promise<R
       return proposal({
         kind: "note_update",
         targetId: id,
-        before: { title: note.title, pinned: note.pinned },
+        before: {
+          title: note.title,
+          pinned: note.pinned,
+          content: note.content.length > 160 ? note.content.slice(0, 160) + "…" : note.content,
+        },
         values,
       });
     }

@@ -29,6 +29,15 @@ export function NotesWorkspace({ initialNotes }: { initialNotes: NoteDTO[] }) {
   const [mobileEditor, setMobileEditor] = useState(false);
   const [, startTransition] = useTransition();
 
+  // Re-sincroniza con el servidor tras un router.refresh() (p. ej. cuando el chat
+  // crea/edita/borra una nota). `initialNotes` solo cambia de referencia cuando el
+  // RSC se re-renderiza; el autoguardado con debounce ya persistió lo escrito.
+  const [syncedInitial, setSyncedInitial] = useState(initialNotes);
+  if (initialNotes !== syncedInitial) {
+    setSyncedInitial(initialNotes);
+    setNotes(initialNotes);
+  }
+
   const selected = notes.find((n) => n.id === selectedId) ?? null;
 
   const filtered = useMemo(() => {

@@ -173,7 +173,9 @@ El chat **nunca escribe en la DB por sí mismo**. El modelo *propone*, el usuari
 | `propose_note_update` | `updateNote(id, patch)` |
 | `propose_note_delete` | `deleteNote(id)` |
 
-No se abre ninguna ruta de escritura nueva: el único código que muta datos sigue siendo el de `src/app/actions/`, con su `requireUserId()` y su scoping `where: { id, userId }`.
+No se abre ninguna ruta de escritura nueva: el único código que muta datos sigue siendo el de `src/app/actions/` (más `src/app/actions/chat-proposals.ts`, con su `requireUserId()` y scoping `where: { id, userId }`).
+
+**Refresco en pantalla:** tras aplicar/deshacer, `<ProposalCard>` llama a `router.refresh()`. Las tarjetas del dashboard son RSC y se actualizan solas. `TasksView` y `NotesWorkspace` guardan `useState(initial)`, así que re-sincronizan con el prop fresco mediante el patrón de ajuste en render (`if (initial !== syncedInitial) { setSyncedInitial(initial); setTasks(initial); }`), no con `useEffect`.
 
 ### Salvaguardas para update/delete
 

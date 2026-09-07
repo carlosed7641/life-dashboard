@@ -34,6 +34,15 @@ export function TasksView({ initial }: { initial: Task[] }) {
   const [due, setDue] = useState("");
   const [, startTransition] = useTransition();
 
+  // El servidor es la fuente de verdad tras un router.refresh() (p. ej. cuando el
+  // chat crea/edita/borra una tarea). `initial` solo cambia de referencia cuando
+  // el RSC se re-renderiza, así que re-sincronizamos la lista en ese momento.
+  const [syncedInitial, setSyncedInitial] = useState(initial);
+  if (initial !== syncedInitial) {
+    setSyncedInitial(initial);
+    setTasks(initial);
+  }
+
   const pending = tasks.filter((t) => !t.done);
   const done = tasks.filter((t) => t.done);
 
