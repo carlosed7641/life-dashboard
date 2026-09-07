@@ -318,6 +318,42 @@ export function IconExternal(p: IconProps) {
   );
 }
 
+export function IconChat(p: IconProps) {
+  return (
+    <svg {...base({ ...p, strokeWidth: 1.7 })}>
+      <path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+export function IconSend(p: IconProps) {
+  return (
+    <svg {...base({ ...p, strokeWidth: 1.8 })}>
+      <path d="M22 2 11 13" />
+      <path d="M22 2 15 22l-4-9-9-4z" />
+    </svg>
+  );
+}
+
+export function IconMic({ active, ...p }: IconProps & { active?: boolean }) {
+  return (
+    <svg {...base({ ...p, strokeWidth: 1.7 })} fill={active ? "currentColor" : "none"}>
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 10a7 7 0 0 0 14 0" fill="none" />
+      <path d="M12 17v5" fill="none" />
+    </svg>
+  );
+}
+
+export function IconLock(p: IconProps) {
+  return (
+    <svg {...base({ ...p, strokeWidth: 1.7 })}>
+      <rect x="4" y="10" width="16" height="11" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
+}
+
 export const NAV_ICON = {
   grid: IconGrid,
   calendar: IconCalendar,

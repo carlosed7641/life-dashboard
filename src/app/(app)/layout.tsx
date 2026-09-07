@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppShell } from "@/components/app-shell";
 import { UpcomingToast, type UpcomingEvent } from "@/components/upcoming-toast";
+import { ChatWidget } from "@/components/chat/chat-widget";
 import { getTodayEvents } from "@/lib/google/calendar";
 import { GoogleConnectionError } from "@/lib/google/client";
 
@@ -44,6 +45,7 @@ export default async function AppLayout({
         {children}
       </AppShell>
       <UpcomingToast events={upcoming} />
+      <ChatWidget />
     </>
   );
 }

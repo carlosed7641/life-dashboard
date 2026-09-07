@@ -25,6 +25,12 @@ export type DriveFile = {
   viewedTime: Date; // última vez que el usuario lo abrió
 };
 
+export type DriveFileFull = DriveFile & {
+  sizeBytes: number | null; // null en Docs/Sheets/Slides nativos: no reportan tamaño
+  modifiedTime: Date;
+  createdTime: Date | null;
+};
+
 const LABEL: Record<FileCategory, string> = {
   image: "Imagen",
   video: "Vídeo",
@@ -106,4 +112,79 @@ export async function getRecentFiles(
         };
       });
   }));
+}
+
+/**
+ * Listado general de Drive para el chat: acepta una query `q` de Drive (la escribe
+ * el modelo) y devuelve el tamaño de cada archivo. La API de Drive NO permite
+ * filtrar por tamaño en `q`, así que se pagina y el filtrado por bytes se hace
+ * en quien consume esto. `truncated` avisa si se alcanzó `maxFiles`.
+ *
+ * Por defecto solo incluye archivos DE TU PROPIEDAD (`'me' in owners`), no los
+ * que otras personas han compartido contigo. Pasa `includeShared: true` para
+ * incluirlos.
+ */
+export async function listFiles(
+  params: { q?: string; orderBy?: string; maxFiles?: number; includeShared?: boolean } = {},
+  explicitUserId?: string,
+): Promise<{ files: DriveFileFull[]; truncated: boolean }> {
+  const userId = await resolveUserId(explicitUserId);
+  const base = params.q?.trim() || "trashed = false";
+  const q =
+    params.includeShared || /\bowners\b/.test(base) ? base : `${base} and 'me' in owners`;
+  const orderBy = params.orderBy?.trim() || "modifiedTime desc";
+  const maxFiles = Math.min(Math.max(params.maxFiles ?? 2000, 1), 5000);
+
+  return memo(
+    `drive:list:${q}:${orderBy}:${maxFiles}:${userId}`,
+    30_000,
+    () =>
+      withGoogleAuth(userId, async () => {
+        const client = await getGoogleClient(userId, SCOPES.drive);
+        const drive = google.drive({ version: "v3", auth: client });
+
+        const out: DriveFileFull[] = [];
+        let pageToken: string | undefined;
+        let truncated = false;
+
+        do {
+          const res = await drive.files.list({
+            orderBy,
+            q,
+            pageSize: 1000,
+            pageToken,
+            fields:
+              "nextPageToken, files(id, name, mimeType, size, webViewLink, viewedByMeTime, modifiedTime, createdTime)",
+            spaces: "drive",
+          });
+
+          for (const f of res.data.files ?? []) {
+            const name = f.name ?? "(sin nombre)";
+            const mimeType = f.mimeType ?? "";
+            const category = categoryOf(mimeType, name);
+            const modified = f.modifiedTime ? new Date(f.modifiedTime) : new Date(0);
+            out.push({
+              id: f.id ?? "",
+              name,
+              mimeType,
+              category,
+              kind: LABEL[category],
+              webViewLink: f.webViewLink ?? `https://drive.google.com/file/d/${f.id}/view`,
+              viewedTime: f.viewedByMeTime ? new Date(f.viewedByMeTime) : modified,
+              sizeBytes: f.size ? Number(f.size) : null,
+              modifiedTime: modified,
+              createdTime: f.createdTime ? new Date(f.createdTime) : null,
+            });
+            if (out.length >= maxFiles) {
+              truncated = Boolean(res.data.nextPageToken);
+              break;
+            }
+          }
+
+          pageToken = out.length >= maxFiles ? undefined : res.data.nextPageToken ?? undefined;
+        } while (pageToken);
+
+        return { files: out, truncated };
+      }),
+  );
 }

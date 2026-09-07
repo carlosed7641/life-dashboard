@@ -21,6 +21,13 @@ export type WeekEvent = AgendaEvent & {
   endHour: number;
 };
 
+export type DetailedEvent = AgendaEvent & {
+  description: string | null;
+  location: string | null;
+  attendees: string[]; // correos de los invitados
+  recurring: boolean; // pertenece a una serie recurrente
+};
+
 function toDate(v?: string | null): Date | null {
   return v ? new Date(v) : null;
 }
@@ -135,6 +142,69 @@ export async function getWeekEvents(
 
     return { days, events };
   }));
+}
+
+/**
+ * Eventos en un rango arbitrario, con descripción, ubicación e invitados.
+ * Para el chat: `from`/`to` son ISO (los resuelve el modelo con la fecha actual
+ * inyectada en el prompt, en zona America/Bogota).
+ */
+export async function listEvents(
+  params: { from: string; to: string; limit?: number },
+  explicitUserId?: string,
+): Promise<DetailedEvent[]> {
+  const userId = await resolveUserId(explicitUserId);
+  const from = new Date(params.from);
+  const to = new Date(params.to);
+  const limit = Math.min(Math.max(params.limit ?? 50, 1), 250);
+
+  return memo(
+    `cal:list:${from.toISOString()}:${to.toISOString()}:${limit}:${userId}`,
+    30_000,
+    () =>
+      withGoogleAuth(userId, async () => {
+        const client = await getGoogleClient(userId, SCOPES.calendar);
+        const cal = google.calendar({ version: "v3", auth: client });
+
+        const res = await cal.events.list({
+          calendarId: "primary",
+          timeMin: from.toISOString(),
+          timeMax: to.toISOString(),
+          singleEvents: true,
+          orderBy: "startTime",
+          maxResults: limit,
+        });
+
+        return (res.data.items ?? [])
+          .map((e): DetailedEvent | null => {
+            const startDate = toDate(e.start?.dateTime) ?? toDate(e.start?.date);
+            const endDate = toDate(e.end?.dateTime) ?? toDate(e.end?.date) ?? startDate;
+            if (!startDate || !endDate) return null;
+            const allDay = !e.start?.dateTime;
+            return {
+              id: e.id ?? cryptoId(),
+              title: e.summary ?? "(sin título)",
+              time: allDay ? "Todo el día" : formatTime(startDate),
+              allDay,
+              start: startDate,
+              end: endDate,
+              past: !allDay && endDate.getTime() <= Date.now(),
+              htmlLink: e.htmlLink ?? "https://calendar.google.com/",
+              description: e.description?.trim() || null,
+              location: e.location?.trim() || null,
+              attendees: (e.attendees ?? [])
+                .map((a) => a.email ?? "")
+                .filter(Boolean),
+              recurring: Boolean(e.recurringEventId),
+            };
+          })
+          .filter((x): x is DetailedEvent => x !== null)
+          .sort(
+            (a, b) =>
+              Number(b.allDay) - Number(a.allDay) || a.start.getTime() - b.start.getTime(),
+          );
+      }),
+  );
 }
 
 function cryptoId() {

@@ -56,7 +56,7 @@ export function UpcomingToast({ events }: { events: UpcomingEvent[] }) {
   if (!current) return null;
 
   return (
-    <div className="fixed bottom-20 right-4 z-40 w-[320px] max-w-[calc(100vw-2rem)] md:bottom-6 md:right-6">
+    <div className="fixed bottom-40 right-4 z-40 w-[320px] max-w-[calc(100vw-2rem)] md:bottom-24 md:right-6">
       <div className="flex items-start gap-3 rounded-2xl border border-accent-soft-border bg-card p-4 shadow-lg shadow-black/5">
         <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-[#15803d]">
           <IconBell size={18} />
