@@ -311,7 +311,8 @@ Sí es posible, y en el navegador sale **gratis y sin backend**.
 - **UI:** botón de micrófono en el compositor. Mientras escucha: icono en rojo con pulso y el textarea en modo dictado. Se para al pulsar de nuevo, o automáticamente tras ~3 s de silencio. El texto queda **editable antes de enviar** — nunca se envía solo, el dictado es solo entrada de texto.
 - **Requisitos:** HTTPS (localhost cuenta) y permiso de micrófono del navegador.
 - **Compatibilidad:** Chrome, Edge y Safari (incl. iOS 14.1+) sí; **Firefox no**. Feature-detect → si no existe la API, el botón simplemente no se pinta.
-- **Tipos:** el DOM lib de TypeScript no incluye `SpeechRecognition`. Declarar una interfaz mínima en `src/types/speech.d.ts` para no añadir `@types/dom-speech-recognition` y mantener la promesa de cero dependencias.
+- **Tipos:** el DOM lib de TypeScript no incluye `SpeechRecognition`. Se definen tipos mínimos **locales dentro de `use-speech.ts`** (no un `.d.ts` global, para no chocar con `Window` si una versión de TS los añade).
+- **Lint estricto (react-hooks):** `supported` se marca dentro del efecto con un `eslint-disable-next-line react-hooks/set-state-in-effect` puntual; `toggle` no usa un ref de `listening` sino un booleano `running` interno del closure del efecto (`onstart`/`onend`), expuesto vía `apiRef`.
 
 > Aviso de privacidad honesto: en Chrome de escritorio, esta API envía el audio a los servidores de Google para transcribirlo. Dado que la app ya lee tu Gmail y tu Drive con tu cuenta de Google, no cambia el perímetro — pero conviene saberlo.
 

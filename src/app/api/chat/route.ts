@@ -103,8 +103,11 @@ export async function POST(req: NextRequest) {
       };
 
       let assistantText = "";
+      let nudgedMissingTool = false;
       const toolLog: Array<{ name: string; input: unknown }> = [];
       const proposals: Proposal[] = [];
+      // Frases con las que el modelo suele "narrar" una propuesta sin haberla creado.
+      const CLAIMS_PROPOSAL = /\bpropuse\b|en la tarjeta|conf[íi]rma\w*\b/i;
 
       send({ type: "conversation", id: conversationId });
 
@@ -128,7 +131,22 @@ export async function POST(req: NextRequest) {
           const final = await ms.finalMessage();
           messages.push({ role: "assistant", content: final.content });
 
-          if (final.stop_reason !== "tool_use") break;
+          if (final.stop_reason !== "tool_use") {
+            // El modelo dice que propuso algo pero no invocó ninguna herramienta:
+            // una sola vez, se le obliga a hacerlo para que aparezca la tarjeta.
+            if (!nudgedMissingTool && proposals.length === 0 && CLAIMS_PROPOSAL.test(assistantText)) {
+              nudgedMissingTool = true;
+              assistantText = "";
+              send({ type: "reset" });
+              messages.push({
+                role: "user",
+                content:
+                  "[sistema] No invocaste ninguna herramienta propose_*, así que el usuario no ve ninguna tarjeta y no se ha creado, editado ni borrado nada. Invoca AHORA la herramienta propose_* que corresponda con los datos que describiste. No repitas el texto anterior; con una frase corta tras la llamada basta.",
+              });
+              continue;
+            }
+            break;
+          }
 
           const toolUses = final.content.filter(
             (b): b is Anthropic.ToolUseBlock => b.type === "tool_use",

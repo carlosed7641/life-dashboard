@@ -143,3 +143,23 @@ body {
   padding: 6px 10px;
   text-align: left;
 }
+
+/* Scrollbar fino y verde para el chat */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent) 35%, var(--border)) transparent;
+}
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-radius: 999px;
+}
+.chat-scroll:hover::-webkit-scrollbar-thumb {
+  background: var(--accent);
+}

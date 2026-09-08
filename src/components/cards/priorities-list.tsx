@@ -11,6 +11,15 @@ export function PrioritiesList({ initial }: { initial: Item[] }) {
   const [items, setItems] = useState(initial);
   const [, startTransition] = useTransition();
 
+  // Re-sincroniza con el servidor tras un router.refresh() (p. ej. cuando el chat
+  // crea/edita/borra una tarea prioritaria). `initial` solo cambia de referencia
+  // cuando el RSC se re-renderiza.
+  const [syncedInitial, setSyncedInitial] = useState(initial);
+  if (initial !== syncedInitial) {
+    setSyncedInitial(initial);
+    setItems(initial);
+  }
+
   function toggle(item: Item) {
     const next = !item.done;
     setItems((prev) => prev.map((x) => (x.id === item.id ? { ...x, done: next } : x)));

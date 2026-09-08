@@ -1,16 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconChat, IconX, IconSend } from "@/components/icons";
+import { IconChat, IconX, IconSend, IconMic } from "@/components/icons";
 import { ChatMessage, type ChatRole } from "@/components/chat/chat-message";
 import { ProposalCard, type ProposalOutcome } from "@/components/chat/proposal-card";
 import { PermissionsNote } from "@/components/chat/permissions-note";
 import { streamChat, type ChatEvent } from "@/lib/chat/client";
+import { useSpeech } from "@/lib/chat/use-speech";
 import type { Proposal } from "@/lib/chat/tools";
 import { SUGGESTED_PROMPTS } from "@/lib/chat/prompt";
 import { cn } from "@/lib/cn";
 
 type Msg = { id: string; role: ChatRole; content: string };
+
+const AUTO_SEND_SECONDS = 2;
+const TEXTAREA_MAX_PX = 140;
+
+function autoGrow(el: HTMLTextAreaElement) {
+  el.style.height = "auto";
+  const full = el.scrollHeight;
+  el.style.height = `${Math.min(full, TEXTAREA_MAX_PX)}px`;
+  el.style.overflowY = full > TEXTAREA_MAX_PX ? "auto" : "hidden";
+}
 
 const TOOL_LABEL: Record<string, string> = {
   list_calendar_events: "Consultando el calendario…",
@@ -38,11 +49,26 @@ export function ChatWidget() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Cuenta atrás para auto-enviar tras el dictado (null = inactiva).
+  const [autoSend, setAutoSend] = useState<number | null>(null);
 
   const conversationId = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const loadedRef = useRef(false);
+  const autoSendTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sendingRef = useRef(false); // evita doble envío por doble submit / carrera
+  const inputRef = useRef(input);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    inputRef.current = input;
+  });
+
+  // Caja de texto que crece con el contenido (estilo WhatsApp), hasta un tope.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (el) autoGrow(el);
+  }, [input, open]);
 
   // Carga el hilo guardado la primera vez que se abre.
   useEffect(() => {
@@ -75,8 +101,14 @@ export function ChatWidget() {
   const send = useCallback(
     (text: string) => {
       const message = text.trim();
-      if (!message || busy) return;
+      if (!message || busy || sendingRef.current) return;
+      sendingRef.current = true;
 
+      if (autoSendTimer.current) {
+        clearInterval(autoSendTimer.current);
+        autoSendTimer.current = null;
+      }
+      setAutoSend(null);
       setError(null);
       setInput("");
       setProposals([]); // las propuestas anteriores caducan al enviar otro mensaje
@@ -102,6 +134,11 @@ export function ChatWidget() {
               prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + e.delta } : m)),
             );
             break;
+          case "reset":
+            setMessages((prev) =>
+              prev.map((m) => (m.id === assistantId ? { ...m, content: "" } : m)),
+            );
+            break;
           case "tool":
             setActiveTools((prev) =>
               e.phase === "start"
@@ -125,12 +162,46 @@ export function ChatWidget() {
           if (err?.name !== "AbortError") setError(err?.message ?? "Error de conexión");
         })
         .finally(() => {
+          sendingRef.current = false;
           setBusy(false);
           setActiveTools([]);
         });
     },
     [busy],
   );
+
+  const cancelAutoSend = useCallback(() => {
+    if (autoSendTimer.current) {
+      clearInterval(autoSendTimer.current);
+      autoSendTimer.current = null;
+    }
+    setAutoSend(null);
+  }, []);
+
+  useEffect(() => () => cancelAutoSend(), [cancelAutoSend]);
+
+  const speech = useSpeech({
+    onTranscript: (text) =>
+      setInput((prev) => (prev.trim() ? prev.trimEnd() + " " : "") + text),
+    onEnd: (didTranscribe) => {
+      if (!didTranscribe || busy || !inputRef.current.trim()) return;
+      // Auto-envío con ventana de cancelación.
+      cancelAutoSend();
+      setAutoSend(AUTO_SEND_SECONDS);
+      autoSendTimer.current = setInterval(() => {
+        setAutoSend((n) => {
+          if (n === null) return null;
+          if (n <= 1) {
+            if (autoSendTimer.current) clearInterval(autoSendTimer.current);
+            autoSendTimer.current = null;
+            queueMicrotask(() => send(inputRef.current));
+            return null;
+          }
+          return n - 1;
+        });
+      }, 1000);
+    },
+  });
 
   return (
     <>
@@ -169,7 +240,7 @@ export function ChatWidget() {
             </header>
 
             {/* Mensajes */}
-            <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+            <div ref={scrollRef} className="chat-scroll flex-1 space-y-3 overflow-y-auto px-4 py-4">
               {messages.length === 0 && <EmptyState onPick={send} />}
 
               {messages.map((m, i) => (
@@ -214,6 +285,21 @@ export function ChatWidget() {
 
             {/* Compositor */}
             <div className="border-t border-border bg-card px-3 py-3">
+              {speech.error && (
+                <p className="mb-1.5 px-1 text-[11px] text-red-600">{speech.error}</p>
+              )}
+              {autoSend !== null && (
+                <div className="mb-1.5 flex items-center justify-between rounded-lg bg-accent-soft px-2.5 py-1.5 text-[12px] text-accent-ink">
+                  <span>Enviando en {autoSend}…</span>
+                  <button
+                    type="button"
+                    onClick={cancelAutoSend}
+                    className="font-semibold hover:underline"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -222,8 +308,13 @@ export function ChatWidget() {
                 className="flex items-end gap-2 rounded-2xl border border-border px-2.5 py-1.5 focus-within:border-accent"
               >
                 <textarea
+                  ref={textareaRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(e) => {
+                    cancelAutoSend();
+                    setInput(e.target.value);
+                    autoGrow(e.target);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -231,9 +322,32 @@ export function ChatWidget() {
                     }
                   }}
                   rows={1}
-                  placeholder="Pregunta sobre tu agenda, correos, archivos…"
-                  className="max-h-32 min-h-[24px] flex-1 resize-none bg-transparent py-1 text-sm outline-none placeholder:text-muted"
+                  placeholder={
+                    speech.listening
+                      ? "Escuchando…"
+                      : "Pregunta sobre tu agenda, correos, archivos…"
+                  }
+                  className="chat-scroll min-h-[24px] flex-1 resize-none overflow-y-hidden bg-transparent py-1 text-sm leading-snug outline-none placeholder:text-muted"
+                  style={{ maxHeight: TEXTAREA_MAX_PX }}
                 />
+                {speech.supported && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      cancelAutoSend();
+                      speech.toggle();
+                    }}
+                    aria-label={speech.listening ? "Detener dictado" : "Dictar por voz"}
+                    className={cn(
+                      "mb-0.5 shrink-0 rounded-lg p-1.5 transition",
+                      speech.listening
+                        ? "animate-pulse bg-red-600 text-white"
+                        : "text-muted hover:text-text",
+                    )}
+                  >
+                    <IconMic size={16} active={speech.listening} />
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={busy || !input.trim()}

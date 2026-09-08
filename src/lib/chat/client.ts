@@ -3,6 +3,7 @@ import type { Proposal } from "@/lib/chat/tools";
 export type ChatEvent =
   | { type: "conversation"; id: string }
   | { type: "text"; delta: string }
+  | { type: "reset" }
   | { type: "tool"; name: string; phase: "start" | "end" }
   | { type: "proposal"; proposal: Proposal }
   | { type: "done"; proposals: number }
