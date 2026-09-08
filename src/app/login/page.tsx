@@ -31,6 +31,16 @@ export default async function LoginPage() {
         <p className="mt-4 text-xs text-muted">
           Se pedirá acceso de solo lectura a Calendar, Gmail y Drive.
         </p>
+
+        <p className="mt-6 text-xs text-muted">
+          <a href="/privacy" className="hover:underline">
+            Política de privacidad
+          </a>
+          {" · "}
+          <a href="/terms" className="hover:underline">
+            Términos
+          </a>
+        </p>
       </div>
     </div>
   );
