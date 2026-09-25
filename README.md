@@ -2,7 +2,7 @@
 
 Panel único con calendario, correos, tareas y notas. Next.js 16 (App Router) ·
 Auth.js v5 · Prisma + Supabase Postgres · APIs de Google (solo lectura) ·
-resumen diario con Claude.
+resumen diario y chat asistente con Claude.
 
 La navegación es responsive: sidebar en escritorio, menú + barra inferior en móvil
 (breakpoint `md`, 768 px).
@@ -68,7 +68,7 @@ npx auth secret          # genera AUTH_SECRET
 
 - `ALLOWED_EMAIL` — solo este correo podrá entrar (déjalo vacío para permitir a
   cualquiera).
-- `ANTHROPIC_API_KEY` — para el resumen diario.
+- `ANTHROPIC_API_KEY` — para el resumen diario y el chat asistente.
 - `CRON_SECRET` — cadena larga y aleatoria (protege el endpoint del cron).
 - `APP_TZ` — zona horaria para fechas y para agrupar el resumen (por defecto
   `America/Bogota`).
@@ -113,22 +113,44 @@ src/
       page.tsx                 Resumen (dashboard)
       calendario/ tareas/ notas/ correos/ archivos/
     login/                     Pantalla de acceso
+    privacy/ terms/            Política de privacidad y términos (login + verificación Google)
     api/auth/[...nextauth]/    Handler de Auth.js
+    api/chat/route.ts          Streaming del chat con Claude (tool calling, SSE)
     api/cron/daily-summary/    Regenera el resumen (Vercel Cron)
-    actions/                   Server Actions: tasks, notes, summary, auth
+    actions/                   Server Actions: tasks, notes, summary, auth, chat-proposals
   lib/
     db.ts                      Prisma singleton
     google/                    client (refresco de token) + calendar / gmail / drive
     summary.ts                 Genera el resumen con Claude y lo cachea en BD
+    chat/                      client (SSE) · prompt (system prompt) · tools (lectura + propose_*) · use-speech (dictado)
     time.ts / format.ts        Fechas y horas en la zona de la app
     memo.ts                    Cache en memoria con TTL para las lecturas de Google
+    nav.ts / cn.ts             Items de navegación · helper de clases
   components/
     app-shell.tsx              Sidebar + navegación móvil (drawer + barra inferior)
     cards/                     Tarjetas del dashboard
     notes/ calendar/           Editor de notas · vista semanal
-prisma/schema.prisma           User/Account/Session + Task/Note/DailySummary
+    chat/                      Widget flotante, mensajes, tarjeta de propuesta, nota de permisos
+prisma/schema.prisma           User/Account/Session + Task/Note/DailySummary + Conversation/ChatMessage
 design/                        Mockups del diseño (canvas de Claude Design)
 ```
+
+## Chat asistente (IA)
+
+Widget flotante (botón inferior derecho) que responde en lenguaje natural sobre el
+calendario, el correo, Drive, las tareas y las notas del usuario, usando Claude con
+tool calling (`src/lib/chat/tools.ts`) y streaming por SSE (`src/app/api/chat/route.ts`).
+
+- **Solo lectura sobre Google**: puede consultar Calendar, Gmail y Drive, pero nunca
+  crea, edita ni borra nada ahí.
+- **Tareas y notas mediante propuesta**: para crear/editar/borrar, el modelo emite una
+  `propose_*` que se muestra como tarjeta (`components/chat/proposal-card.tsx`); el
+  cambio solo se aplica si el usuario la confirma (`app/actions/chat-proposals.ts`).
+- **Fuera de alcance**: preguntas ajenas a esas cuatro fuentes reciben una negativa
+  fija (ver `REFUSAL` en `lib/chat/prompt.ts`), sin usar conocimiento general.
+- **Dictado por voz**: `lib/chat/use-speech.ts` transcribe con la Web Speech API y
+  auto-envía tras una pausa (contador configurable en `chat-widget.tsx`).
+- El historial se guarda por usuario en `Conversation` / `ChatMessage` (Prisma).
 
 ## Notas de diseño
 
