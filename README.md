@@ -4,6 +4,8 @@ Panel único con calendario, correos, tareas y notas. Next.js 16 (App Router) ·
 Auth.js v5 · Prisma + Supabase Postgres · APIs de Google (solo lectura) ·
 resumen diario y chat asistente con Claude.
 
+**Demo:** https://life-dashboard-gamma-khaki.vercel.app
+
 La navegación es responsive: sidebar en escritorio, menú + barra inferior en móvil
 (breakpoint `md`, 768 px).
 
