@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV, MOBILE_TABS, isActive } from "@/lib/nav";
-import { NAV_ICON, IconHome, IconMenu, IconDots, IconLogout } from "@/components/icons";
+import { NAV_ICON, IconDashboard, IconMenu, IconDots, IconLogout } from "@/components/icons";
 import { signOutAction } from "@/app/actions/auth";
 import { cn } from "@/lib/cn";
 
@@ -173,7 +173,7 @@ function Brand() {
   return (
     <div className="flex items-center gap-[11px] px-1.5">
       <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px] bg-accent text-white">
-        <IconHome size={18} />
+        <IconDashboard size={18} />
       </span>
       <span className="font-display text-[15px] font-semibold text-[#f4fbf7]">
         Mi Dashboard
