@@ -24,14 +24,15 @@ export async function GET() {
   const conversation = await prisma.conversation.findFirst({
     where: { userId: session.user.id },
     orderBy: { updatedAt: "desc" },
-    include: { messages: { orderBy: { createdAt: "asc" }, take: 200 } },
+    include: { messages: { orderBy: { createdAt: "desc" }, take: 200 } },
   });
 
   if (!conversation) return NextResponse.json({ conversationId: null, messages: [] });
 
+  // Los 200 más recientes, mostrados en orden cronológico.
   return NextResponse.json({
     conversationId: conversation.id,
-    messages: conversation.messages.map((m) => ({
+    messages: conversation.messages.reverse().map((m) => ({
       id: m.id,
       role: m.role,
       content: m.content,
@@ -62,22 +63,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Mensaje demasiado largo" }, { status: 400 });
   }
 
-  // Conversación: reutiliza la del usuario o crea una nueva.
-  let conversation = body.conversationId
-    ? await prisma.conversation.findFirst({ where: { id: body.conversationId, userId } })
-    : null;
-  if (!conversation) {
-    conversation = await prisma.conversation.create({
-      data: { userId, title: userMessage.slice(0, 50) || "Nueva conversación" },
-    });
-  }
-  const conversationId = conversation.id;
+  // Hilo único por usuario: la conversación indicada o, si no llega (o no es
+  // suya), la más reciente. Solo se crea una nueva al guardar el primer par de
+  // mensajes, para que un fallo no deje hilos vacíos que tapen el bueno.
+  const existing =
+    (body.conversationId
+      ? await prisma.conversation.findFirst({
+          where: { id: body.conversationId, userId },
+          select: { id: true },
+        })
+      : null) ??
+    (await prisma.conversation.findFirst({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      select: { id: true },
+    }));
 
-  const history = await prisma.chatMessage.findMany({
-    where: { conversationId },
-    orderBy: { createdAt: "asc" },
-    take: HISTORY_LIMIT,
-  });
+  // Los últimos HISTORY_LIMIT mensajes, en orden cronológico.
+  const recent = existing
+    ? await prisma.chatMessage.findMany({
+        where: { conversationId: existing.id },
+        orderBy: { createdAt: "desc" },
+        take: HISTORY_LIMIT,
+      })
+    : [];
+  const history = recent.reverse();
+  // La API exige que el primer mensaje sea del usuario.
+  while (history.length && history[0].role !== "user") history.shift();
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const system = buildSystemPrompt();
@@ -108,8 +120,6 @@ export async function POST(req: NextRequest) {
       const proposals: Proposal[] = [];
       // Frases con las que el modelo suele "narrar" una propuesta sin haberla creado.
       const CLAIMS_PROPOSAL = /\bpropuse\b|en la tarjeta|conf[íi]rma\w*\b/i;
-
-      send({ type: "conversation", id: conversationId });
 
       try {
         for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
@@ -175,25 +185,37 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        await prisma.$transaction([
-          prisma.chatMessage.create({
-            data: { conversationId, role: "user", content: userMessage },
-          }),
-          prisma.chatMessage.create({
-            data: {
-              conversationId,
-              role: "assistant",
-              content: assistantText.trim() || "(sin respuesta)",
-              toolCalls: toolLog.length
-                ? (toolLog as unknown as Prisma.InputJsonValue)
-                : Prisma.JsonNull,
-            },
-          }),
-          prisma.conversation.update({
-            where: { id: conversationId },
-            data: { updatedAt: new Date() },
-          }),
-        ]);
+        const now = Date.now();
+        const turn = [
+          // Marcas de tiempo explícitas para que el orden usuario → asistente sea estable.
+          { role: "user", content: userMessage, createdAt: new Date(now) },
+          {
+            role: "assistant",
+            content: assistantText.trim() || "(sin respuesta)",
+            toolCalls: toolLog.length
+              ? (toolLog as unknown as Prisma.InputJsonValue)
+              : Prisma.JsonNull,
+            createdAt: new Date(now + 1),
+          },
+        ];
+
+        // Una sola escritura atómica: o se guarda el turno completo o nada.
+        const saved = existing
+          ? await prisma.conversation.update({
+              where: { id: existing.id },
+              data: { updatedAt: new Date(), messages: { create: turn } },
+              select: { id: true },
+            })
+          : await prisma.conversation.create({
+              data: {
+                userId,
+                title: userMessage.slice(0, 50) || "Nueva conversación",
+                messages: { create: turn },
+              },
+              select: { id: true },
+            });
+
+        send({ type: "conversation", id: saved.id });
 
         send({ type: "done", proposals: proposals.length });
       } catch (e) {

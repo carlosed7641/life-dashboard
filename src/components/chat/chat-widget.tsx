@@ -48,6 +48,8 @@ export function ChatWidget() {
   const [activeTools, setActiveTools] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  // El hilo guardado ya se cargó (o falló): hasta entonces no se puede enviar.
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Cuenta atrás para auto-enviar tras el dictado (null = inactiva).
   const [autoSend, setAutoSend] = useState<number | null>(null);
@@ -89,7 +91,8 @@ export function ChatWidget() {
       })
       .catch(() => {
         /* sin hilo previo: se empieza en blanco */
-      });
+      })
+      .finally(() => setReady(true));
   }, [open]);
 
   useEffect(() => {
@@ -101,7 +104,7 @@ export function ChatWidget() {
   const send = useCallback(
     (text: string) => {
       const message = text.trim();
-      if (!message || busy || sendingRef.current) return;
+      if (!message || !ready || busy || sendingRef.current) return;
       sendingRef.current = true;
 
       if (autoSendTimer.current) {
@@ -167,7 +170,7 @@ export function ChatWidget() {
           setActiveTools([]);
         });
     },
-    [busy],
+    [busy, ready],
   );
 
   const cancelAutoSend = useCallback(() => {
@@ -350,11 +353,11 @@ export function ChatWidget() {
                 )}
                 <button
                   type="submit"
-                  disabled={busy || !input.trim()}
+                  disabled={!ready || busy || !input.trim()}
                   aria-label="Enviar"
                   className={cn(
                     "mb-0.5 shrink-0 rounded-lg p-1.5 text-white transition",
-                    busy || !input.trim() ? "bg-border-strong" : "bg-accent hover:bg-accent-hover",
+                    !ready || busy || !input.trim() ? "bg-border-strong" : "bg-accent hover:bg-accent-hover",
                   )}
                 >
                   <IconSend size={16} />
