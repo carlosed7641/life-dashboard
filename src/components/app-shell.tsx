@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -57,10 +57,24 @@ export function AppShell({
     .join("")
     .toUpperCase();
 
+  // Con el drawer abierto, bloquea el scroll de la página de fondo.
+  useEffect(() => {
+    if (!drawer) return;
+    const html = document.documentElement;
+    const prevHtml = html.style.overflow;
+    const prevBody = document.body.style.overflow;
+    html.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, [drawer]);
+
   return (
     <div className="min-h-screen md:flex">
       {/* Sidebar escritorio */}
-      <aside className="hidden md:flex w-60 shrink-0 flex-col gap-6 bg-sidebar px-[18px] py-7 text-sidebar-muted">
+      <aside className="sticky top-0 hidden h-screen overflow-y-auto md:flex w-60 shrink-0 flex-col gap-6 bg-sidebar px-[18px] py-7 text-sidebar-muted">
         <Brand />
         <nav className="flex flex-col gap-[3px]">
           {NAV.map((item) => (
@@ -100,7 +114,7 @@ export function AppShell({
       </header>
 
       {/* Contenido */}
-      <main className="flex-1 pb-24 md:pb-0">{children}</main>
+      <main className="min-w-0 flex-1 pb-24 md:pb-0">{children}</main>
 
       {/* Barra inferior móvil */}
       <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-card px-1.5 pb-2.5 pt-2 md:hidden">
@@ -133,10 +147,10 @@ export function AppShell({
 
       {/* Drawer móvil con la navegación completa */}
       {drawer && (
-        <div className="fixed inset-0 z-40 md:hidden" onClick={() => setDrawer(false)}>
+        <div className="fixed inset-0 z-40 overscroll-contain md:hidden" onClick={() => setDrawer(false)}>
           <div className="absolute inset-0 bg-black/40" />
           <div
-            className="absolute left-0 top-0 flex h-full w-72 flex-col gap-6 bg-sidebar px-[18px] py-7 text-sidebar-muted"
+            className="absolute left-0 top-0 flex h-full w-72 flex-col gap-6 overflow-y-auto overscroll-contain bg-sidebar px-[18px] py-7 text-sidebar-muted"
             onClick={(e) => e.stopPropagation()}
           >
             <Brand />
