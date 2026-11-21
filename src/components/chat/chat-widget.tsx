@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { IconChat, IconX, IconSend, IconMic } from "@/components/icons";
 import { ChatMessage, type ChatRole } from "@/components/chat/chat-message";
 import { ProposalCard, type ProposalOutcome } from "@/components/chat/proposal-card";
@@ -10,8 +10,16 @@ import { useSpeech } from "@/lib/chat/use-speech";
 import type { Proposal } from "@/lib/chat/tools";
 import { SUGGESTED_PROMPTS } from "@/lib/chat/prompt";
 import { cn } from "@/lib/cn";
+import { chatDayLabel, formatTime } from "@/lib/format";
 
-type Msg = { id: string; role: ChatRole; content: string };
+type Msg = { id: string; role: ChatRole; content: string; createdAt: string };
+
+/** Fechas y horas del chat en la zona horaria del navegador, como WhatsApp. */
+const LOCAL_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const dayKey = (iso: string) =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: LOCAL_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(
+    new Date(iso),
+  );
 
 const AUTO_SEND_SECONDS = 2;
 const TEXTAREA_MAX_PX = 140;
@@ -82,11 +90,14 @@ export function ChatWidget() {
         if (!data) return;
         conversationId.current = data.conversationId ?? null;
         setMessages(
-          (data.messages ?? []).map((m: { id: string; role: ChatRole; content: string }) => ({
-            id: m.id,
-            role: m.role,
-            content: m.content,
-          })),
+          (data.messages ?? []).map(
+            (m: { id: string; role: ChatRole; content: string; createdAt: string }) => ({
+              id: m.id,
+              role: m.role,
+              content: m.content,
+              createdAt: m.createdAt,
+            }),
+          ),
         );
       })
       .catch(() => {
@@ -117,10 +128,11 @@ export function ChatWidget() {
       setProposals([]); // las propuestas anteriores caducan al enviar otro mensaje
       setResolved({});
       const assistantId = crypto.randomUUID();
+      const now = new Date().toISOString();
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), role: "user", content: message },
-        { id: assistantId, role: "assistant", content: "" },
+        { id: crypto.randomUUID(), role: "user", content: message, createdAt: now },
+        { id: assistantId, role: "assistant", content: "", createdAt: now },
       ]);
       setBusy(true);
 
@@ -246,14 +258,20 @@ export function ChatWidget() {
             <div ref={scrollRef} className="chat-scroll flex-1 space-y-3 overflow-y-auto px-4 py-4">
               {messages.length === 0 && <EmptyState onPick={send} />}
 
-              {messages.map((m, i) => (
-                <ChatMessage
-                  key={m.id}
-                  role={m.role}
-                  content={m.content}
-                  pending={busy && i === messages.length - 1 && m.role === "assistant"}
-                />
-              ))}
+              {messages.map((m, i) => {
+                const newDay = i === 0 || dayKey(messages[i - 1].createdAt) !== dayKey(m.createdAt);
+                return (
+                  <Fragment key={m.id}>
+                    {newDay && <DaySeparator label={chatDayLabel(new Date(m.createdAt), LOCAL_TZ)} />}
+                    <ChatMessage
+                      role={m.role}
+                      content={m.content}
+                      time={formatTime(new Date(m.createdAt), LOCAL_TZ)}
+                      pending={busy && i === messages.length - 1 && m.role === "assistant"}
+                    />
+                  </Fragment>
+                );
+              })}
 
               {activeTools.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
@@ -387,6 +405,16 @@ function EmptyState({ onPick }: { onPick: (t: string) => void }) {
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function DaySeparator({ label }: { label: string }) {
+  return (
+    <div className="flex justify-center py-1">
+      <span className="rounded-full border border-border bg-card px-3 py-1 text-[11px] font-medium text-muted">
+        {label}
+      </span>
     </div>
   );
 }

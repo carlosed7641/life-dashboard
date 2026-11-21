@@ -45,6 +45,22 @@ export function formatLongDate(d: Date, tz: string = APP_TZ): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+/** Separador de días del chat: "Hoy" · "Ayer" · "22 de septiembre de 2026". */
+export function chatDayLabel(d: Date, tz: string = APP_TZ): string {
+  const key = (x: Date) =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(x);
+  const now = new Date();
+  const k = key(d);
+  if (k === key(now)) return "Hoy";
+  if (k === key(new Date(now.getTime() - 86_400_000))) return "Ayer";
+  return new Intl.DateTimeFormat("es-MX", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: tz,
+  }).format(d);
+}
+
 /** "1 sep" / "24 may" */
 export function formatShortDate(d: Date, tz: string = APP_TZ): string {
   return new Intl.DateTimeFormat("es-MX", {

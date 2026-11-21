@@ -37,6 +37,7 @@ export async function GET() {
       role: m.role,
       content: m.content,
       toolCalls: m.toolCalls ?? null,
+      createdAt: m.createdAt.toISOString(),
     })),
   });
 }
