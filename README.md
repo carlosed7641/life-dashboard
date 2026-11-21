@@ -152,7 +152,10 @@ tool calling (`src/lib/chat/tools.ts`) y streaming por SSE (`src/app/api/chat/ro
   fija (ver `REFUSAL` en `lib/chat/prompt.ts`), sin usar conocimiento general.
 - **Dictado por voz**: `lib/chat/use-speech.ts` transcribe con la Web Speech API y
   auto-envía tras una pausa (contador configurable en `chat-widget.tsx`).
-- El historial se guarda por usuario en `Conversation` / `ChatMessage` (Prisma).
+- El historial se guarda por usuario en `Conversation` / `ChatMessage` (Prisma), como
+  un hilo único: la conversación solo se crea al guardar su primer turno completo, el
+  modelo recibe como contexto los 20 mensajes más recientes y el widget muestra la hora
+  de cada mensaje con separadores de día (Hoy · Ayer · fecha).
 
 ## Notas de diseño
 
