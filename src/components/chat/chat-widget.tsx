@@ -256,7 +256,7 @@ export function ChatWidget() {
 
             {/* Mensajes */}
             <div ref={scrollRef} className="chat-scroll flex-1 space-y-3 overflow-y-auto px-4 py-4">
-              {messages.length === 0 && <EmptyState onPick={send} />}
+              {!ready ? <LoadingThread /> : messages.length === 0 && <EmptyState onPick={send} />}
 
               {messages.map((m, i) => {
                 const newDay = i === 0 || dayKey(messages[i - 1].createdAt) !== dayKey(m.createdAt);
@@ -415,6 +415,33 @@ function DaySeparator({ label }: { label: string }) {
       <span className="rounded-full border border-border bg-card px-3 py-1 text-[11px] font-medium text-muted">
         {label}
       </span>
+    </div>
+  );
+}
+
+/** Esqueleto de burbujas mientras se carga el hilo guardado. */
+function LoadingThread() {
+  const rows: Array<{ side: "left" | "right"; w: string }> = [
+    { side: "right", w: "w-2/5" },
+    { side: "left", w: "w-3/4" },
+    { side: "right", w: "w-1/2" },
+    { side: "left", w: "w-2/3" },
+  ];
+  return (
+    <div role="status" aria-label="Cargando conversación" className="space-y-3">
+      {rows.map((r, i) => (
+        <div key={i} className={cn("flex", r.side === "right" ? "justify-end" : "justify-start")}>
+          <div
+            className={cn(
+              "h-9 animate-pulse rounded-2xl",
+              r.w,
+              r.side === "right" ? "rounded-br-md bg-accent-soft" : "rounded-bl-md border border-border bg-card",
+            )}
+            style={{ animationDelay: `${i * 120}ms` }}
+          />
+        </div>
+      ))}
+      <p className="pt-1 text-center text-[12px] text-muted">Cargando conversación…</p>
     </div>
   );
 }
