@@ -1,4 +1,4 @@
-# Dashboard de Vida
+# Life Dashboard
 
 Panel único con calendario, correos, tareas y notas. Next.js 16 (App Router) ·
 Auth.js v5 · Prisma + Supabase Postgres · APIs de Google (solo lectura) ·
