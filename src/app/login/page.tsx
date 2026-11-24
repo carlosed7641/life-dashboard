@@ -13,7 +13,7 @@ export default async function LoginPage() {
         <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-white">
           <IconDashboard size={24} />
         </span>
-        <h1 className="mt-5 font-display text-xl font-semibold">Mi Dashboard</h1>
+        <h1 className="mt-5 font-display text-xl font-semibold">Life Dashboard</h1>
         <p className="mt-2 text-sm text-muted">
           Tu calendario, correos, tareas y notas en un solo panel.
         </p>

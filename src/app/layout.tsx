@@ -24,7 +24,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mi Dashboard",
+  title: "Life Dashboard",
   description: "Calendario, correos, tareas y notas en un solo panel.",
 };
 

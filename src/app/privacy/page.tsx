@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Política de privacidad · Mi Dashboard",
+  title: "Política de privacidad · Life Dashboard",
 };
 
 const UPDATED = "8 de septiembre de 2026";
@@ -11,7 +11,7 @@ export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
       <Link href="/" className="text-sm text-accent hover:underline">
-        ← Mi Dashboard
+        ← Life Dashboard
       </Link>
 
       <h1 className="mt-6 font-display text-2xl font-semibold">Política de privacidad</h1>
@@ -19,7 +19,7 @@ export default function PrivacyPage() {
 
       <div className="markdown-body mt-8 space-y-5 text-[15px] leading-relaxed">
         <p>
-          Mi Dashboard es una aplicación personal de un solo usuario. Reúne en un panel
+          Life Dashboard es una aplicación personal de un solo usuario. Reúne en un panel
           privado el calendario, el correo, los archivos, las tareas y las notas de la
           persona que la usa. No tiene otros usuarios ni fines comerciales.
         </p>

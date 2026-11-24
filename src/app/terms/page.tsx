@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Términos de servicio · Mi Dashboard",
+  title: "Términos de servicio · Life Dashboard",
 };
 
 const UPDATED = "8 de septiembre de 2026";
@@ -11,7 +11,7 @@ export default function TermsPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
       <Link href="/" className="text-sm text-accent hover:underline">
-        ← Mi Dashboard
+        ← Life Dashboard
       </Link>
 
       <h1 className="mt-6 font-display text-2xl font-semibold">Términos de servicio</h1>
@@ -19,7 +19,7 @@ export default function TermsPage() {
 
       <div className="markdown-body mt-8 space-y-5 text-[15px] leading-relaxed">
         <p>
-          Mi Dashboard es una herramienta personal de uso privado. El acceso está restringido
+          Life Dashboard es una herramienta personal de uso privado. El acceso está restringido
           a una única cuenta autorizada por el propietario.
         </p>
 

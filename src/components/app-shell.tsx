@@ -107,7 +107,7 @@ export function AppShell({
             <IconMenu size={22} />
           </button>
           <span className="font-display text-[15px] font-semibold text-[#f4fbf7]">
-            Mi Dashboard
+            Life Dashboard
           </span>
         </div>
         <Avatar user={user} initials={initials} size={32} />
@@ -190,7 +190,7 @@ function Brand() {
         <IconDashboard size={18} />
       </span>
       <span className="font-display text-[15px] font-semibold text-[#f4fbf7]">
-        Mi Dashboard
+        Life Dashboard
       </span>
     </div>
   );
