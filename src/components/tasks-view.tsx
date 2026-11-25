@@ -45,11 +45,13 @@ export function TasksView({ initial }: { initial: Task[] }) {
 
   const pending = tasks.filter((t) => !t.done);
   const done = tasks.filter((t) => t.done);
+  // Nombre y fecha son obligatorios para crear una tarea.
+  const canAdd = title.trim().length > 0 && due !== "";
 
   function add(e: React.FormEvent) {
     e.preventDefault();
     const value = title.trim();
-    if (!value) return;
+    if (!value || !due) return;
     const optimistic: Task = {
       id: `tmp-${Date.now()}`,
       title: value,
@@ -111,11 +113,18 @@ export function TasksView({ initial }: { initial: Task[] }) {
           type="date"
           value={due}
           onChange={(e) => setDue(e.target.value)}
+          required
+          aria-label="Fecha límite"
           className="rounded-lg border border-border px-2 py-1.5 text-sm text-muted outline-none"
         />
         <button
           type="submit"
-          className="flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover"
+          disabled={!canAdd}
+          title={canAdd ? undefined : "Escribe un nombre y elige una fecha"}
+          className={cn(
+            "flex items-center justify-center gap-1.5 rounded-[10px] px-4 py-2 text-sm font-semibold text-white transition-colors",
+            canAdd ? "bg-accent hover:bg-accent-hover" : "cursor-not-allowed bg-border-strong",
+          )}
         >
           <IconPlus size={15} />
           Añadir

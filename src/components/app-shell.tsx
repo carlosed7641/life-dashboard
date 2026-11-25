@@ -146,11 +146,27 @@ export function AppShell({
       </nav>
 
       {/* Drawer móvil con la navegación completa */}
-      {drawer && (
-        <div className="fixed inset-0 z-40 overscroll-contain md:hidden" onClick={() => setDrawer(false)}>
-          <div className="absolute inset-0 bg-black/40" />
+      {/* Siempre montado: se anima con transform/opacity al abrir y cerrar. */}
+      <div
+        inert={!drawer}
+        aria-hidden={!drawer}
+        className={cn(
+          "fixed inset-0 z-40 overscroll-contain md:hidden",
+          !drawer && "pointer-events-none",
+        )}
+        onClick={() => setDrawer(false)}
+      >
           <div
-            className="absolute left-0 top-0 flex h-full w-72 flex-col gap-6 overflow-y-auto overscroll-contain bg-sidebar px-[18px] py-7 text-sidebar-muted"
+            className={cn(
+              "absolute inset-0 bg-black/40 transition-opacity duration-300 ease-out motion-reduce:transition-none",
+              drawer ? "opacity-100" : "opacity-0",
+            )}
+          />
+          <div
+            className={cn(
+              "absolute left-0 top-0 flex h-full w-72 flex-col gap-6 overflow-y-auto overscroll-contain bg-sidebar px-[18px] py-7 text-sidebar-muted shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform motion-reduce:transition-none",
+              drawer ? "translate-x-0" : "-translate-x-full",
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             <Brand />
@@ -177,8 +193,7 @@ export function AppShell({
               </form>
             </div>
           </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

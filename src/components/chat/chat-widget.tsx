@@ -220,24 +220,42 @@ export function ChatWidget() {
 
   return (
     <>
-      {!open && (
-        <button
-          type="button"
-          aria-label="Abrir asistente"
-          onClick={() => setOpen(true)}
-          className="fixed bottom-20 right-4 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-accent text-white shadow-lg shadow-black/15 transition hover:bg-accent-hover md:bottom-6 md:right-6"
-        >
-          <IconChat size={22} />
-        </button>
-      )}
+      <button
+        type="button"
+        aria-label="Abrir asistente"
+        onClick={() => setOpen(true)}
+        tabIndex={open ? -1 : 0}
+        aria-hidden={open}
+        className={cn(
+          "fixed bottom-20 right-4 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-accent text-white shadow-lg shadow-black/15 transition-[transform,opacity,background-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-accent-hover motion-reduce:transition-none md:bottom-6 md:right-6",
+          open ? "pointer-events-none scale-50 opacity-0" : "scale-100 opacity-100",
+        )}
+      >
+        <IconChat size={22} />
+      </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 md:inset-y-0 md:right-0 md:left-auto md:w-[420px]">
+      {/* Siempre montado: se anima con transform/opacity al abrir y cerrar. */}
+      <div
+        inert={!open}
+        aria-hidden={!open}
+        className={cn(
+          "fixed inset-0 z-50 md:inset-y-0 md:right-0 md:left-auto md:w-[420px]",
+          !open && "pointer-events-none",
+        )}
+      >
           <div
-            className="absolute inset-0 bg-black/30 md:hidden"
+            className={cn(
+              "absolute inset-0 bg-black/30 transition-opacity duration-300 ease-out motion-reduce:transition-none md:hidden",
+              open ? "opacity-100" : "opacity-0",
+            )}
             onClick={() => setOpen(false)}
           />
-          <div className="absolute inset-y-0 right-0 flex w-full flex-col bg-bg shadow-2xl md:w-[420px]">
+          <div
+            className={cn(
+              "absolute inset-y-0 right-0 flex w-full flex-col bg-bg shadow-2xl transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform motion-reduce:transition-none md:w-[420px]",
+              open ? "translate-x-0 opacity-100" : "translate-x-full opacity-0",
+            )}
+          >
             {/* Cabecera */}
             <header className="flex items-start justify-between gap-2 border-b border-border bg-card px-4 py-3">
               <div className="min-w-0">
@@ -383,8 +401,7 @@ export function ChatWidget() {
               </form>
             </div>
           </div>
-        </div>
-      )}
+      </div>
     </>
   );
 }
